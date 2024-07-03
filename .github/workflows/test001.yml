@@ -16,7 +16,7 @@ jobs:
     runs-on: ubuntu-latest
 
     env:
-      IMAGE_NAME: stellarhub/mermaid-live-editor
+      IMAGE_NAME: ${{ vars.IMAGE_NAME }}
 
     steps:
     - name: Checkout code
@@ -26,7 +26,8 @@ jobs:
       id: vars
       run: |
         TIMESTAMP=$(date +'%Y%m%d%H%M%S')
-        TAG="${{ github.event.inputs.tag }}"
+        # TAG="${{ github.event.inputs.tag }}"
+        TAG="${{ vars.TAG }}"
         if [ -z "$TAG" ]; then
           TAG=$TIMESTAMP
         fi
