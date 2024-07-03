@@ -6,8 +6,10 @@ on:
       - main
     paths:
       - '/Dockerfile'
-      - '.github/workflows/test001.yml'
+      # - '.github/workflows/test001.yml'
   workflow_dispatch:
+  release:
+    types: [published]
 
 jobs:
   build:
@@ -21,18 +23,24 @@ jobs:
       uses: actions/checkout@v4
 
     - name: Set up Docker Build Tag
-      id: vars
+    #  id: vars
+    # schedule push / use TIMESTAMP as tag
+    # workflow_dispatch / use Action variable as tag
+    # release / use github.ref_name (tag) as tag
+    # if you need to pass variables between steps, use $GITHUB_ENV
       run: |
         TIMESTAMP=$(date +'%Y%m%d%H%M%S')
-        # TAG="${{ github.event.inputs.tag }}"
-        TAG="${{ vars.TAG }}"
-        if [ -z "$TAG" ]; then
-          TAG=$TIMESTAMP
+        TAG=$TIMESTAMP
+        if [ "${{ github.event_name }}" = "release" ]; then
+          TAG="${{ github.ref_name }}"
+        fi
+        if [ "${{ github.event_name }}" = "workflow_dispatch" ]; then
+          TAG="${{ vars.TAG }}"
         fi
         echo "TAG=$TAG" >> $GITHUB_ENV
 
     - name: Display Tag for Confirmation
-      if: ${{ github.event_name == 'workflow_dispatch' }}
+      # if: ${{ github.event_name == 'workflow_dispatch' }}
       run: |
         echo "Using tag: $TAG"
 
@@ -53,7 +61,6 @@ jobs:
         docker buildx build --platform linux/amd64,linux/arm64 -t ${{ env.IMAGE_NAME }}:${{ env.TAG }} --push .
 
     - name: Get image digest
-      id: get_digest
       run: |
         DIGEST=$(docker buildx imagetools inspect ${{ env.IMAGE_NAME }}:${{ env.TAG }} | grep -m 1 "Digest:" | awk '{ print $2 }')
         echo "DIGEST=$DIGEST" >> $GITHUB_ENV
