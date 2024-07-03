@@ -31,3 +31,5 @@ FROM nginx:1.25-alpine3.18 AS mermaid
 
 COPY ./nginx.conf /etc/nginx/conf.d/default.conf
 COPY --from=mermaid-live-editor-builder /app/docs /usr/share/nginx/html
+
+EXPOSE 8080
