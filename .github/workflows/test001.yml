@@ -1,15 +1,16 @@
 name: test001
 
 on:
+  release:
+    types: [published]
   push:
     branches:
       - main
     paths:
       - '/Dockerfile'
-      # - '.github/workflows/test001.yml'
+    # - '.github/workflows/test001.yml'
   workflow_dispatch:
-  release:
-    types: [published]
+
 
 jobs:
   build:
